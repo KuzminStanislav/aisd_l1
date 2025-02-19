@@ -36,6 +36,14 @@ private:
         }
     }
 
+    void print(std::ostream& os, const Node* node) const {
+        if (node) {
+            print(os, node->left.get());
+            os << node->data << " ";
+            print(os, node->right.get());
+        }
+    }
+
 public:
     BinaryTree() : root(nullptr) {};
 
@@ -50,7 +58,22 @@ public:
         }
     }
 
+    BinaryTree& operator=(const BinaryTree& other) {
+        if (this != &other) {
+            root.reset();
+            if (other.root) {
+                root = std::make_unique<Node>(other.root->data);
+                copy_recursive(root.get(), other.root.get());
+            }
+        }
+        return *this;
+    }
 
+    template <typename U>
+    friend std::ostream& operator<<(std::ostream& os, const BinaryTree<U>& tree) {
+        tree.print(os, tree.root.get());
+        return os;
+    }
 };
 
 int main()
