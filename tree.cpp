@@ -36,11 +36,11 @@ private:
         }
     }
 
-    void print(std::ostream& os, const Node* node) const {
+    void print_helper(const Node* node) const {
         if (node) {
-            print(os, node->left.get());
-            os << node->data << " ";
-            print(os, node->right.get());
+            print_helper(node->left.get());
+            std::cout << node->data << " ";
+            print_helper(node->right.get());
         }
     }
 
@@ -69,10 +69,13 @@ public:
         return *this;
     }
 
-    template <typename U>
-    friend std::ostream& operator<<(std::ostream& os, const BinaryTree<U>& tree) {
-        tree.print(os, tree.root.get());
-        return os;
+    void print() const {
+        print_helper(root.get());
+        std::cout << std::endl;
+    }
+
+    bool insert(const T& key, std::unique_ptr<Node>& node) {
+
     }
 };
 
