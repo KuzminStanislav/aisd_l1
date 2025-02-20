@@ -44,6 +44,36 @@ private:
         }
     }
 
+    bool insert_helper(const T& key, std::unique_ptr<Node>& node) {
+        if (node == nullptr) {
+            node = std::make_unique<Node>(key);
+            return true;
+        }
+
+        if (key < node->data) {
+            return insert_helper(key, node->left);
+        }
+
+        else if (key > node->data) {
+            return insert_helper(key, node->right);
+        }
+        return false;
+    }
+
+    Node* contain_helper(const T& key, const Node* node) const {
+        if (node == nullptr || key == node->data) {
+            return const_cast<Node*>(node);
+        }
+
+        if (key < node->data) {
+            return contain_helper(key, node->left.get());
+        }
+
+        else {
+            return contain_helper(key, node->right.get());
+        }
+    }
+
 public:
     BinaryTree() : root(nullptr) {};
 
@@ -74,9 +104,14 @@ public:
         std::cout << std::endl;
     }
 
-    bool insert(const T& key, std::unique_ptr<Node>& node) {
-
+    bool insert(const T& key) {
+        return insert_helper(key, root);
     }
+
+    bool contains(const T& key) {
+        return contain_helper(key, root.get()) != nullptr;
+    }
+
 };
 
 int main()
