@@ -22,16 +22,16 @@ class BinaryTree {
 private:
     std::unique_ptr<Node> root;
 
-    void copy_recursive(Node* current, const Node* other) {
+    void copy_helper(Node* current, const Node* other) {
         if (other) {
             if (other->left) {
                 current->left = std::make_unique<Node>(other->left->data);
-                copy_recursive(current->left.get(), other->left.get());
+                copy_helper(current->left.get(), other->left.get());
             }
 
             if (other->right) {
                 current->right = std::make_unique<Node>(other->right->data);
-                copy_recursive(current->right.get(), other->right.get());
+                copy_helper(current->right.get(), other->right.get());
             }
         }
     }
@@ -74,6 +74,48 @@ private:
         }
     }
 
+    bool erase_helper(const T& key, std::unique_ptr<Node>& node) {
+        if (node == nullptr) {
+            return false;
+        }
+
+        if (key < node->data) {
+            return erase_helper(key, node->left);
+        }
+
+        else if (key > node->data) {
+            return erase_helper(key, node->right);
+        }
+
+        else {
+            if (node->left == nullptr) {
+                node = std::move(node->right);
+            }
+
+            else if (node->right == nullptr) {
+                node = std::move(node->left);
+            }
+
+            else {
+                Node* chd_node = minimum(node->right.get());
+                node->data = chd_node->data;
+                erase_helper(chd_node->data, node->right);
+            }
+            return true;
+        }
+    }
+
+    Node* minimum(const Node* node) const {
+        if (node == nullptr) {
+            return nullptr;
+        }
+
+        while (node->left != nullptr) {
+            node = node->left.get();
+        }
+        return const_cast<Node*>(node);
+    }
+
 public:
     BinaryTree() : root(nullptr) {};
 
@@ -93,7 +135,7 @@ public:
             root.reset();
             if (other.root) {
                 root = std::make_unique<Node>(other.root->data);
-                copy_recursive(root.get(), other.root.get());
+                copy_helper(root.get(), other.root.get());
             }
         }
         return *this;
@@ -112,6 +154,9 @@ public:
         return contain_helper(key, root.get()) != nullptr;
     }
 
+    bool erase(const T& key) {
+        return erase_helper(key, root);
+    }
 };
 
 int main()
