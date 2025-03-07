@@ -7,14 +7,14 @@ size_t lcg() {
     return x;
 }
 
-
 template <typename T>
 struct Node {
     T data;
     std::unique_ptr<Node> left;
     std::unique_ptr<Node> right;
+    int height;
 
-    Node(const T& value): data(value), left(nullptr), right(nullptr) {}
+    Node(const T& value): data(value), left(nullptr), right(nullptr), height(1) {}
 };
 
 template <typename T>
@@ -156,6 +156,44 @@ public:
 
     bool erase(const T& key) {
         return erase_helper(key, root);
+    }
+
+    //AVL-Tree(balanced)
+
+    int get_height(const Node* node) const {
+        if (node == nullptr) {
+            return 0;
+        }
+        return node->height;
+    }
+
+    int balance_factor(const Node* node) const {
+        return get_height(node->left.get()) - get_height(node->right.get());
+    }
+
+    void update_height(Node* node) {
+        if (node == nullptr) {
+            return;
+        }
+        node->height = std::max(height(node->left.get()), height(node->right.get())) + 1;
+    }
+
+    std::unique_ptr<Node> rotate_left(std::unique_ptr<Node>& node) {
+        std::unique_ptr<Node> new_root = std::move(node->right);
+        node->rigth = std::move(new_root->left);
+        new_root->left = std::move(node);
+        update_height(node.get());
+        update_height(new_root.get());
+        return new_root;
+    }
+
+    std::unique_ptr<Node> rotate_right(std::unique_ptr<Node>& node) {
+        std::unique_ptr<Node> new_root = std::move(node->left);
+        node->left = std::move(new_root->right);
+        new_root->right = std::move(node);
+        update_height(node.get());
+        update_height(new_root.get());
+        return new_root;
     }
 };
 
