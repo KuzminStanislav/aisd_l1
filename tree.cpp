@@ -78,7 +78,7 @@ private:
         }
     }
 
-    bool erase_helper(const T& key, std::unique_ptr<Node>& node) {
+    bool erase_helper(const T& key, Node*& node) {
         if (node == nullptr) {
             return false;
         }
@@ -174,6 +174,10 @@ public:
     }
 
     int balance_factor(const Node* node) const {
+        if (node == nullptr) {
+            return 0;
+        }
+
         return get_height(node->left.get()) - get_height(node->right.get());
     }
 
@@ -181,25 +185,117 @@ public:
         if (node == nullptr) {
             return;
         }
-        node->height = std::max(height(node->left.get()), height(node->right.get())) + 1;
+        node->height = std::max(height(node->left), height(node->right)) + 1;
     }
 
-    std::unique_ptr<Node> rotate_left(std::unique_ptr<Node>& node) {
-        std::unique_ptr<Node> new_root = std::move(node->right);
-        node->rigth = std::move(new_root->left);
-        new_root->left = std::move(node);
-        update_height(node.get());
-        update_height(new_root.get());
+    Node* rotate_left(Node*& node) {
+        Node* new_root = node->right;
+        node->rigth = new_root->left;
+        new_root->left = node;
+        update_height(node);
+        update_height(new_root);
         return new_root;
     }
 
-    std::unique_ptr<Node> rotate_right(std::unique_ptr<Node>& node) {
-        std::unique_ptr<Node> new_root = std::move(node->left);
-        node->left = std::move(new_root->right);
-        new_root->right = std::move(node);
-        update_height(node.get());
-        update_height(new_root.get());
+    Node* rotate_right(Node*& node) {
+        Node* new_root = node->left;
+        node->left = new_root->right;
+        new_root->right = node;
+        update_height(node);
+        update_height(new_root);
         return new_root;
+    }
+
+    Node* balance(Node*& node) {
+        if (node == nullptr) {
+            return node;
+        }
+
+        update_height(node);
+        int bf = balance_factor(node);
+
+        if (bf > 1) {
+            if (balance_factor(node->left) >= 0) {
+                return rotate_right(node);
+            }
+
+            else {
+                node->left = rotate_left(node->left);
+                return rotate_right(node);
+            }
+        }
+
+        else if (bf < -1) {
+            if (balance_factor(node->right) <= 0) {
+                return rotate_left(node);
+            }
+
+            else {
+                node->right = rotate_right(node->right);
+                return rotate_left(node);
+            }
+        }
+        return node;
+    }
+
+    Node* insert_balance(const T& key, Node*& node) {
+        if (node == nullptr) {
+            node = new Node(key);
+        }
+        else if (key < node->data) {
+            node->left = insert_balance(key, node->left);
+        }
+        else if (key > node->data) {
+            node->right = insert_balance(key, node->right);
+        }
+        else {
+            return node;
+        }
+        return balance(node);
+    }
+
+    Node* erase_balance(const T& key, Node*& node) {
+        if (node == nullptr) {
+            return node;
+        }
+
+        if (key < node->data) {
+            node->left = insert_balance(key, node->left);
+        }
+        else if (key > node->data) {
+            node->right = insert_balance(key, node->right);
+        }
+
+        else {
+            if (node->left == nullptr) {
+                Node* old = node;
+                node = node->right;
+                delete old;
+            }
+            else if (node->right == nullptr) {
+                Node* old = node;
+                node = node->left;
+                delete old;
+            }
+            else {
+                Node* chd_node = minimum(node->right);
+                node->data = chd_node->data;
+                node-> = erase_balance(chd_node->data, node->right);
+            }
+        }
+        return balance(node);
+    }
+
+    //With balancing
+
+    bool insert(const T& key) {
+        root = insert_balance(key, root);
+        return true;
+    }
+
+    bool erase(const T& key) {
+        root = erase_balance(key, root);
+        return true;
     }
 };
 
