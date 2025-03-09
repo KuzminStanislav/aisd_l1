@@ -22,6 +22,21 @@ double MeasureTime(Func&& func) {
     return std::chronoduration_cast<duration>(end - start).count();
 }
 
+void TestFillTime(size_t size, BinaryTree<int>& tree) {
+    double avg_f_time = 0;
+    for (size_t i = 0; i < 100; ++i) {
+        tree = BinaryTree<int>();
+        avg_f_time += MeasureTime([&]() {
+            for (size_t j = 0; j < size, ++j;) {
+                tree.insert(lcg());
+            }
+            });
+    }
+
+    avg_f_time /= 100;
+    std::cout << "Average filling tree time : " << avg_f_time << "mks" << std::endl;
+}
+
 void TestSearchTime(size_t size, BinaryTree<int>& tree) {
     double avg_s_time = 0;
     for (size_t i = 0; i < 1000; ++i) {
