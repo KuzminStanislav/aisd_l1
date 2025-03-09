@@ -1,18 +1,17 @@
 ﻿#include <iostream>
 
 template <typename T>
-struct Node {
-    T data;
-    Node* left;
-    Node* right;
-    int height;
-
-    Node(const T& value): data(value), left(nullptr), right(nullptr), height(1) {}
-};
-
-template <typename T>
 class BinaryTree {
 private:
+    struct Node {
+        T data;
+        Node* left;
+        Node* right;
+        int height;
+
+        Node(const T& value) : data(value), left(nullptr), right(nullptr), height(1) {}
+    };
+
     Node* root;
 
     void destroy_tree(Node* node) {
@@ -107,55 +106,33 @@ private:
         }
     }
 
-    Node* minimum(const Node* node) const {
+    Node* minimum(Node* node) const {
         if (node == nullptr) {
             return nullptr;
         }
 
         while (node->left != nullptr) {
-            node = node->left.get();
+            node = node->left;
         }
         return node;
     }
 
-public:
-    BinaryTree() : root(nullptr) {};
-
-    ~BinaryTree() {
-        destroy_tree(root);
-    }
-
-    BinaryTree(const BinaryTree& other) {
-        if (other.root) {
-            root = copy_helper(other.root);
+    Node* maximum(Node* node) const {
+        if (node == nullptr) {
+            return nullptr;
         }
-    }
 
-    BinaryTree& operator=(const BinaryTree& other) {
-        if (this != &other) {
-            destroy_tree(root);
-            if (other.root) {
-                root = copy_helper(other.root);
-            }
+        while (node->right != nullptr) {
+            node = node->right;
         }
-        return *this;
+        return node;
     }
 
-    void print() const {
-        print_helper(root.get());
-        std::cout << std::endl;
-    }
-
-    bool insert(const T& key) {
-        return insert_helper(key, root);
-    }
-
-    bool contains(const T& key) {
-        return contain_helper(key, root.get()) != nullptr;
-    }
-
-    bool erase(const T& key) {
-        return erase_helper(key, root);
+    size_t get_size(Node* node) const {
+        if (node == nullptr) {
+            return 0;
+        }
+        return 1 + get_size(node->left) + get_size(node->right);
     }
 
     //AVL-Tree(balanced)
@@ -172,7 +149,7 @@ public:
             return 0;
         }
 
-        return get_height(node->left.get()) - get_height(node->right.get());
+        return get_height(node->left) - get_height(node->right);
     }
 
     void update_height(Node* node) {
@@ -291,9 +268,44 @@ public:
         root = erase_balance(key, root);
         return true;
     }
-};
 
-int main()
-{
-    std::cout << "Hello World!\n";
-}
+public:
+    BinaryTree() : root(nullptr) {};
+
+    ~BinaryTree() {
+        destroy_tree(root);
+    }
+
+    BinaryTree(const BinaryTree& other) {
+        if (other.root) {
+            root = copy_helper(other.root);
+        }
+    }
+
+    BinaryTree& operator=(const BinaryTree& other) {
+        if (this != &other) {
+            destroy_tree(root);
+            if (other.root) {
+                root = copy_helper(other.root);
+            }
+        }
+        return *this;
+    }
+
+    void print() const {
+        print_helper(root.get());
+        std::cout << std::endl;
+    }
+
+    bool insert(const T& key) {
+        return insert_helper(key, root);
+    }
+
+    bool contains(const T& key) {
+        return contain_helper(key, root.get()) != nullptr;
+    }
+
+    bool erase(const T& key) {
+        return erase_helper(key, root);
+    }
+};
