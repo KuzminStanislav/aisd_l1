@@ -1,4 +1,5 @@
-﻿#include <iostream>
+﻿#pragma once
+#include <iostream>
 
 template <typename T>
 class BinaryTree {
@@ -57,7 +58,7 @@ private:
         return false;
     }
 
-    Node* contain_helper(const T& key, const Node* node) const {
+    Node* contain_helper(const T& key, Node* node) const {
         if (node == nullptr || key == node->data) {
             return node;
         }
@@ -161,7 +162,7 @@ private:
 
     Node* rotate_left(Node*& node) {
         Node* new_root = node->right;
-        node->rigth = new_root->left;
+        node->right = new_root->left;
         new_root->left = node;
         update_height(node);
         update_height(new_root);
@@ -231,10 +232,10 @@ private:
         }
 
         if (key < node->data) {
-            node->left = insert_balance(key, node->left);
+            node->left = erase_balance(key, node->left);
         }
         else if (key > node->data) {
-            node->right = insert_balance(key, node->right);
+            node->right = erase_balance(key, node->right);
         }
 
         else {
@@ -251,21 +252,19 @@ private:
             else {
                 Node* chd_node = minimum(node->right);
                 node->data = chd_node->data;
-                node-> = erase_balance(chd_node->data, node->right);
+                node->right = erase_balance(chd_node->data, node->right);
             }
         }
         return balance(node);
     }
 
-    //With balancing
-
-    bool insert(const T& key) {
-        root = insert_balance(key, root);
+    bool balanced_insert(const T& key) {
+        root = insert_balance(root, key);
         return true;
     }
 
-    bool erase(const T& key) {
-        root = erase_balance(key, root);
+    bool balanced_erase(const T& key) {
+        root = erase_balance(root, key);
         return true;
     }
 
@@ -302,10 +301,14 @@ public:
     }
 
     bool contains(const T& key) {
-        return contain_helper(key, root.get()) != nullptr;
+        return contain_helper(key, root) != nullptr;
     }
 
     bool erase(const T& key) {
         return erase_helper(key, root);
+    }
+
+    size_t size() const {
+        return get_size(root);
     }
 };

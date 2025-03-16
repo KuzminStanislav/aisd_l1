@@ -27,4 +27,5 @@ int main() {
         TestAddRemoveVector(size, vector);
         std::cout << "-----------" << std::endl << std::endl;
     }
+    return 0;
 }
