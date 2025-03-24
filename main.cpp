@@ -81,5 +81,17 @@ int main() {
     std::cout << "Complex tree: ";
     complex_tree.print();
     std::cout << std::endl;
+    
+    BinaryTree<std::string> string_tree;
+    string_tree.insert("text1");
+    string_tree.insert("text2");
+    std::cout << "String tree: ";
+    string_tree.print();
+    std::cout << std::endl;
+    std::cout << "Is contains text2? " << std::boolalpha << string_tree.contains("text2") << std::endl;
+    string_tree.erase("text2");
+    std::cout << "String tree after erasing: ";
+    string_tree.print();
+    std::cout << std::endl << std::endl;
     return 0;
 }
