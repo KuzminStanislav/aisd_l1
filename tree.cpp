@@ -87,15 +87,15 @@ private:
 
         else {
             if (node->left == nullptr) {
-                Node* old = node;
-                node = node->right;
-                delete old;
+                Node* old = node->right;
+                delete node;
+                node = old;
             }
 
             else if (node->right == nullptr) {
-                Node* old = node;
-                node = node->left;
-                delete old;
+                Node* old = node->left;
+                delete node;
+                node = old;
             }
 
             else {
@@ -134,6 +134,14 @@ private:
             return 0;
         }
         return 1 + get_size(node->left) + get_size(node->right);
+    }
+
+    void inorder_traversal(Node* node, std::vector<T>& result) const {
+        if (node) {
+            inorder_traversal(node->left, result);
+            result.push_back(node->data);
+            inorder_traversal(node->right, result);
+        }
     }
 
     //AVL-Tree(balanced)
@@ -311,4 +319,15 @@ public:
     size_t size() const {
         return get_size(root);
     }
+
+    std::vector<T> to_vector() const {
+        std::vector<T> result;
+        inorder_traversal(root, result);
+        return result;
+    }
+};
+
+template<typename T>
+class iterator {
+
 };
