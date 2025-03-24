@@ -83,8 +83,8 @@ int main() {
     std::cout << std::endl;
     
     BinaryTree<std::string> string_tree;
-    string_tree.insert("text1");
     string_tree.insert("text2");
+    string_tree.insert("text1");
     std::cout << "String tree: ";
     string_tree.print();
     std::cout << std::endl;
@@ -93,5 +93,23 @@ int main() {
     std::cout << "String tree after erasing: ";
     string_tree.print();
     std::cout << std::endl << std::endl;
+
+    BinaryTree<int> tree;
+    tree.insert(1);
+    tree.insert(1);
+    tree.insert(22);
+    tree.insert(35);
+    tree.insert(4);
+    tree.insert(7);
+    tree.insert(19);
+    std::cout << "Tree with balancing: ";
+    tree.print();
+    std::cout << std::endl;
+
+    std::cout << "Iterator: ";
+    for (auto it = tree.begin(); it != tree.end(); ++it) {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
     return 0;
 }

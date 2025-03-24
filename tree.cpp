@@ -35,9 +35,11 @@ private:
         T data;
         Node* left;
         Node* right;
+        Node* parent;
         int height;
+        int count;
 
-        Node(const T& value) : data(value), left(nullptr), right(nullptr), height(1) {}
+        Node(const T& value) : data(value), left(nullptr), right(nullptr), parent(nullptr), height(1) {}
     };
 
     Node* root;
@@ -69,20 +71,21 @@ private:
         print_helper(node->right);
     }
 
-    Node* insert_helper(const T& key, Node*& node) {
+    void insert_helper(const T& key, Node*& node) {
         if (node == nullptr) {
             node =  new Node(key);
-            return node;
+            node->parent = nullptr;
         }
 
         if (key < node->data) {
-            return insert_helper(key, node->left);
+            insert_helper(key, node->left);
+            node->left->parent = node;
         }
 
         else if (key > node->data) {
-            return insert_helper(key, node->right);
+            insert_helper(key, node->right);
+            node->right->parent = node;
         }
-        return node;
     }
 
     Node* contain_helper(const T& key, Node* node) const {
@@ -111,22 +114,28 @@ private:
         else if (key > node->data) {
             return erase_helper(key, node->right);
         }
-
         else {
             if (node->left == nullptr) {
-                Node* old = node->right;
-                delete node;
-                node = old;
+                Node* old = node;
+                node = node->right;
+                if (node) {
+                    node->parent = old->parent;
+                }
+                delete old;
             }
 
             else if (node->right == nullptr) {
-                Node* old = node->left;
-                delete node;
-                node = old;
+                Node* old = node;
+                node = node->left;
+                if (node) {
+                    node->parent = old->parent;
+                }
+                delete old;
             }
 
             else {
                 Node* chd_node = minimum(node->right);
+                chd_node->parent = node->parent;
                 node->data = chd_node->data;
                 erase_helper(chd_node->data, node->right);
             }
@@ -139,7 +148,7 @@ private:
             return nullptr;
         }
 
-        while (node->left != nullptr) {
+        while (node->left) {
             node = node->left;
         }
         return node;
@@ -192,7 +201,7 @@ private:
         if (node == nullptr) {
             return;
         }
-        node->height = std::max(height(node->left), height(node->right)) + 1;
+        node->height = std::max(get_height(node->left), get_height(node->right));
     }
 
     Node* rotate_left(Node*& node) {
@@ -330,8 +339,8 @@ public:
         print_helper(root);
     }
 
-    bool insert(const T& key) {
-        return insert_helper(key, root);
+    void insert(const T& key) {
+        insert_helper(key, root);
     }
 
     bool contains(const T& key) {
@@ -355,6 +364,7 @@ public:
     class Iterator {
     private: 
         Node* current;
+        const BinaryTree* tree;
 
     public:
         using value_type = T;
@@ -363,11 +373,11 @@ public:
         using difference_type = std::ptrdiff_t;
         using iterator_category = std::forward_iterator_tag;
 
-        Iterator(Node* node) : current(node){}
+        Iterator(Node* node, const BinaryTree* t) : current(node), tree(t){}
 
         Iterator& operator++() {
             if (current->right) {
-                current = minimum(current->right);
+                current = tree->minimum(current->right);
             }
             else {
                 Node* parent = current->parent;
@@ -404,10 +414,10 @@ public:
     };
 
     Iterator begin() {
-        return Iterator(minimum(root));
+        return Iterator(minimum(root), this);
     }
 
     Iterator end() {
-        return Iterator(nullptr);
+        return Iterator(nullptr, this);
     }
 };
