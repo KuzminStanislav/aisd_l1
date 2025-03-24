@@ -3,6 +3,8 @@
 #include <random>
 #include <chrono>
 #include <algorithm>
+#include <complex>
+#include <string>
 #include "tree.cpp"
 #include "tests.cpp"
 #include "task.cpp"
@@ -66,6 +68,18 @@ int main() {
     for (int num : intersection_res) {
         std::cout << num << " ";
     }
+    std::cout << std::endl;
+
+    BinaryTree<std::complex<float>> complex_tree;
+    std::complex<float> cf1(1.0f, 2.0f);
+    std::complex<float> cf2(3.0f, 4.0f);
+    std::complex<float> cf3(5.0f, 6.0f);
+
+    complex_tree.insert(cf1);
+    complex_tree.insert(cf2);
+    complex_tree.insert(cf3);
+    std::cout << "Complex tree: ";
+    complex_tree.print();
     std::cout << std::endl;
     return 0;
 }

@@ -1,5 +1,32 @@
 ﻿#pragma once
 #include <iostream>
+#include <complex>
+
+template<typename T>
+bool operator<(const std::complex<T>& lhs, const std::complex<T>& rhs) {
+    if (lhs.real() < rhs.real()) {
+        return true;
+    }
+    else if (lhs.real() > rhs.real()) {
+        return false;
+    }
+    else {
+        return lhs.imag() < rhs.imag();
+    }
+}
+
+template<typename T>
+bool operator>(const std::complex<T>& lhs, const std::complex<T>& rhs) {
+    if (lhs.real() > rhs.real()) {
+        return true;
+    }
+    else if (lhs.real() < rhs.real()) {
+        return false;
+    }
+    else {
+        return lhs.imag() > rhs.imag();
+    }
+}
 
 template <typename T>
 class BinaryTree {
@@ -34,18 +61,18 @@ private:
         return new_node;
     }
 
-    void print_helper(const Node* node) const {
-        if (node) {
-            print_helper(node->left);
-            std::cout << node->data << " ";
-            print_helper(node->right);
-        }
+    void print_helper(Node* node) const {
+        if (node == nullptr) { return; }
+
+        print_helper(node->left);
+        std::cout << node->data << " ";
+        print_helper(node->right);
     }
 
-    bool insert_helper(const T& key, Node*& node) {
+    Node* insert_helper(const T& key, Node*& node) {
         if (node == nullptr) {
             node =  new Node(key);
-            return true;
+            return node;
         }
 
         if (key < node->data) {
@@ -55,7 +82,7 @@ private:
         else if (key > node->data) {
             return insert_helper(key, node->right);
         }
-        return false;
+        return node;
     }
 
     Node* contain_helper(const T& key, Node* node) const {
@@ -299,9 +326,8 @@ public:
         return *this;
     }
 
-    void print() const {
-        print_helper(root.get());
-        std::cout << std::endl;
+    void print() {
+        print_helper(root);
     }
 
     bool insert(const T& key) {
@@ -325,9 +351,63 @@ public:
         inorder_traversal(root, result);
         return result;
     }
-};
 
-template<typename T>
-class iterator {
+    class Iterator {
+    private: 
+        Node* current;
 
+    public:
+        using value_type = T;
+        using reference = T&;
+        using pointer = T*;
+        using difference_type = std::ptrdiff_t;
+        using iterator_category = std::forward_iterator_tag;
+
+        Iterator(Node* node) : current(node){}
+
+        Iterator& operator++() {
+            if (current->right) {
+                current = minimum(current->right);
+            }
+            else {
+                Node* parent = current->parent;
+                while (parent && current == parent->right) {
+                    current = parent;
+                    parent = parent->parent;
+                }
+                current = parent;
+            }
+            return *this;
+        }
+
+        Iterator operator++(int) {
+            Iterator temp = *this;
+            ++(*this);
+            return temp;
+        }
+
+        bool operator==(const Iterator& other) const {
+            return current == other.current;
+        }
+
+        bool operator!=(const Iterator& other) const {
+            return !(*this == other);
+        }
+
+        T& operator*() const {
+            return current->data;
+        }
+
+        T* operator->() const {
+            return &(operator*());
+        }
+    };
+
+    Iterator begin() {
+        return Iterator(minimum(root));
+    }
+
+    Iterator end() {
+        return Iterator(nullptr);
+    }
 };
